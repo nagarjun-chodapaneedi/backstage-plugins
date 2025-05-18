@@ -70,8 +70,18 @@ export const ragAiModuleOpenAI = createBackendModule({
           }),
         );
 
-        model.setBaseLLM(
-          new OpenAI({
+        let llmBase;
+
+        if (config.getOptionalString('ai.query.openai.azureOpenAIApiKey')) {
+          llmBase = new OpenAI({
+            configuration: {
+              baseURL: `https://${config.getOptionalString('ai.query.openai.azureOpenAIApiInstanceName')}.openai.azure.com/openai/deployments/${config.getOptionalString('ai.query.openai.azureOpenAIApiDeploymentName')}/chat/completions?api-version=${config.getOptionalString('ai.query.openai.azureOpenAIApiVersion')}`
+            },
+            apiKey: config.getOptionalString('ai.query.openai.azureOpenAIApiKey'),
+            modelName: config.getOptionalString('ai.query.openai.azureOpenAIApiDeploymentName')
+          })
+        } else {
+          llmBase = new OpenAI({
             configuration: {
               baseURL:
                 config.getOptionalString('ai.query.openai.baseURL') ??
@@ -83,8 +93,10 @@ export const ragAiModuleOpenAI = createBackendModule({
             modelName:
               config.getOptionalString('ai.query.openai.modelName') ??
               'gpt-4o-mini',
-          }),
-        );
+          })
+        }
+
+        model.setBaseLLM(llmBase);
       },
     });
   },

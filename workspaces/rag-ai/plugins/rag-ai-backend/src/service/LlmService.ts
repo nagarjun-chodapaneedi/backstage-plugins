@@ -38,6 +38,7 @@ export class LlmService {
     configuredPrompts?: {
       prefix?: string;
       suffix?: string;
+      fallback?: string;
     };
   }) {
     this.logger = logger;

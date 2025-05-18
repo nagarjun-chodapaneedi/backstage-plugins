@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const prefixPrompt = (promptPrefixText?: string) => (embedding: string) =>
+const prefixPrompt = (promptPrefixText?: string, promptFallbackText?: string) => (embedding: string) =>
   promptPrefixText
     ? `${promptPrefixText}  ${embedding}`
     : `You are an agent designed to answer questions from documents, Backstage catalog-info files, OpenAPI specs and Tech Insights Data data provided to you.
 
-If the question does not seem related to the aforementioned items, return I don't know. Do not make up an answer.
+If the question does not seem related to the aforementioned items, return ${promptFallbackText ? promptFallbackText: 'I don\'t know'}. Do not make up an answer.
 Only use information provided by the embedded documentation to construct your response. ` +
       `
 The embedded input document you should use to answer this query is the following:  
@@ -35,9 +35,10 @@ Question: ${input}
 export const createPromptTemplates = (prompts?: {
   prefix?: string;
   suffix?: string;
+  fallback?: string;
 }) => {
   return {
-    prefixPrompt: prefixPrompt(prompts?.prefix),
+    prefixPrompt: prefixPrompt(prompts?.prefix, prompts?.fallback),
     suffixPrompt: suffixPrompt(prompts?.suffix),
   };
 };

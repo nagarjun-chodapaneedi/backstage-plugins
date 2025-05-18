@@ -38,20 +38,31 @@ export class RoadieOpenAiAugmenter extends DefaultVectorAugmentationIndexer {
       config: OpenAiConfig;
     },
   ) {
-    const embeddings = new OpenAIEmbeddings({
-      configuration: {
-        baseURL: config.config.baseUrl
-          ? config.config.baseUrl
-          : 'https://api.openai.com/v1',
-        apiKey: config.config.openAiApiKey ?? config.config.apiKey, // In Node.js defaults to process.env.OPENAI_API_KEY
-      },
-      openAIApiKey: config.config.openAiApiKey ?? config.config.apiKey, // In Node.js defaults to process.env.OPENAI_API_KEY
-      batchSize: config.config.batchSize, // Default value if omitted is 512. Max is 2048
-      modelName: config.config.modelName
-        ? config.config.modelName
-        : 'text-embedding-3-small',
-      dimensions: config.config.embeddingsDimensions,
-    });
+    let embeddings;
+    if (config.config.azureOpenAIApiKey) {
+      embeddings = new OpenAIEmbeddings({
+        azureOpenAIApiKey: config.config.openai.azureOpenAIApiKey,
+        azureOpenAIApiInstanceName: config.config.openai.azureOpenAIApiInstanceName, // before `.openai.azure.com`
+        azureOpenAIApiDeploymentName: config.config.openai.azureOpenAIApiDeploymentName, // the deployment you created for embeddings
+        azureOpenAIApiVersion: config.config.openai.azureOpenAIApiVersion,
+        azureOpenAIApiEmbeddingsDeploymentName: config.config.openai.azureOpenAIApiDeploymentName, // required for embeddings
+      });
+    } else {
+      embeddings = new OpenAIEmbeddings({
+        configuration: {
+          baseURL: config.config.baseUrl
+            ? config.config.baseUrl
+            : 'https://api.openai.com/v1',
+          apiKey: config.config.openAiApiKey ?? config.config.apiKey, // In Node.js defaults to process.env.OPENAI_API_KEY
+        },
+        openAIApiKey: config.config.openAiApiKey ?? config.config.apiKey, // In Node.js defaults to process.env.OPENAI_API_KEY
+        batchSize: config.config.batchSize, // Default value if omitted is 512. Max is 2048
+        modelName: config.config.modelName
+          ? config.config.modelName
+          : 'text-embedding-3-small',
+        dimensions: config.config.embeddingsDimensions,
+      });
+    }
     super({ ...config, embeddings });
   }
 }
